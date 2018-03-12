@@ -32,5 +32,27 @@ public class Rules {
         return currentState;
     }
 
+    public static int getNumberOfLiveNeighbours(Cell[][] cells, int i, int j) {
+        int minIndexI = Math.max(i - 1, 0);
+        int maxIndexI = Math.min(i + 1, cells.length - 1);
+
+        int minIndexJ = Math.max(j - 1, 0);
+        int maxIndexJ = Math.min(j + 1, cells[0].length - 1);
+
+        int liveNeighbours = 0;
+
+        for (int k = minIndexI; k <= maxIndexI; k++) {
+            for (int l = minIndexJ; l <= maxIndexJ; l++) {
+                if (k == i && l == j)
+                    continue;
+
+                if (cells[k][l] == Cell.ALIVE)
+                    liveNeighbours++;
+            }
+        }
+
+        return liveNeighbours;
+    }
+
 }
 

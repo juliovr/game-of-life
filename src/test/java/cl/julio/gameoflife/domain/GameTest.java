@@ -17,186 +17,61 @@ import static org.mockito.BDDMockito.given;
 @RunWith(MockitoJUnitRunner.class)
 public class GameTest {
 
+    public static final int HEIGHT = 10;
+    public static final int WIDTH = 10;
+    public static final int INDEX_FOR_ALIVE_CELL = 0;
+    public static final int INDEX_FOR_DEAD_CELL = 1;
+
     @Mock
     private Random random;
 
-    private Game game;
-
-    @Before
-    public void setUp() {
-        game = new Game(random);
-    }
 
     @Test
     public void checkRandomCellStateForAlive() {
-        given(random.nextInt(Cell.values().length)).willReturn(0);
+        given(random.nextInt(Cell.values().length)).willReturn(INDEX_FOR_ALIVE_CELL);
+
+        Game game = new Game(random, WIDTH, HEIGHT);
 
         assertThat(game.getRandomCellState(), is(ALIVE));
     }
 
     @Test
     public void checkRandomCellStateForDead() {
-        given(random.nextInt(Cell.values().length)).willReturn(1);
+        given(random.nextInt(Cell.values().length)).willReturn(INDEX_FOR_DEAD_CELL);
+
+        Game game = new Game(random, WIDTH, HEIGHT);
 
         assertThat(game.getRandomCellState(), is(DEAD));
     }
 
     @Test
-    public void checkLiveNeighbours() {
-        Cell[][] cells = {
-                { ALIVE, DEAD, DEAD, ALIVE },
-                { DEAD, ALIVE, ALIVE, ALIVE},
-                { DEAD, ALIVE, DEAD, ALIVE },
-                { DEAD, ALIVE, ALIVE, ALIVE},
-        };
+    public void checkAliveCellsRandomAssignInInitialization() {
+        given(random.nextInt(Cell.values().length)).willReturn(INDEX_FOR_ALIVE_CELL);
 
-        assertThat(game.getNumberOfLiveNeighbours(cells, 0, 0), is(1));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 0, 1), is(3));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 0, 2), is(4));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 0, 3), is(2));
+        Game game = new Game(random, WIDTH, HEIGHT);
 
-        assertThat(game.getNumberOfLiveNeighbours(cells, 1, 0), is(3));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 1, 1), is(3));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 1, 2), is(5));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 1, 3), is(3));
+        Cell[][] cells = game.getCells();
 
-        assertThat(game.getNumberOfLiveNeighbours(cells, 2, 0), is(3));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 2, 1), is(4));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 2, 2), is(8));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 2, 3), is(4));
-
-        assertThat(game.getNumberOfLiveNeighbours(cells, 3, 0), is(2));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 3, 1), is(2));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 3, 2), is(4));
-        assertThat(game.getNumberOfLiveNeighbours(cells, 3, 3), is(2));
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                assertThat(cells[i][j], is(ALIVE));
+            }
+        }
     }
 
     @Test
-    public void testBlockPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, DEAD}
-        };
+    public void checkDeadCellsRandomAssignInInitialization() {
+        given(random.nextInt(Cell.values().length)).willReturn(INDEX_FOR_DEAD_CELL);
 
-        assertThat(game.getNewCells(cells), is(cells));
-    }
+        Game game = new Game(random, WIDTH, HEIGHT);
 
-    @Test
-    public void testBoatPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD, DEAD},
-                {DEAD, ALIVE, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
+        Cell[][] cells = game.getCells();
 
-        assertThat(game.getNewCells(cells), is(cells));
-    }
-
-    @Test
-    public void testLoafPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, ALIVE, DEAD, DEAD},
-                {DEAD, ALIVE, DEAD, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        assertThat(game.getNewCells(cells), is(cells));
-    }
-
-    @Test
-    public void testBeehivePattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, ALIVE, DEAD, DEAD},
-                {DEAD, ALIVE, DEAD, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, ALIVE, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        assertThat(game.getNewCells(cells), is(cells));
-    }
-
-    @Test
-    public void testBlinkerPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        Cell[][] expectedCells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        assertThat(game.getNewCells(cells), is(expectedCells));
-
-        //inverse process
-        assertThat(game.getNewCells(expectedCells), is(cells));
-    }
-
-    @Test
-    public void testBeaconPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, ALIVE, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, ALIVE, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        Cell[][] expectedCells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, ALIVE, DEAD, DEAD, DEAD},
-                {DEAD, ALIVE, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, ALIVE, ALIVE, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        assertThat(game.getNewCells(cells), is(expectedCells));
-
-        //inverse process
-        assertThat(game.getNewCells(expectedCells), is(cells));
-    }
-
-    @Test
-    public void testToadPattern() {
-        Cell[][] cells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, ALIVE, ALIVE, ALIVE, DEAD},
-                {DEAD, ALIVE, ALIVE, ALIVE, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        Cell[][] expectedCells = {
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, ALIVE, DEAD, DEAD},
-                {DEAD, ALIVE, DEAD, DEAD, ALIVE, DEAD},
-                {DEAD, ALIVE, DEAD, DEAD, ALIVE, DEAD},
-                {DEAD, DEAD, ALIVE, DEAD, DEAD, DEAD},
-                {DEAD, DEAD, DEAD, DEAD, DEAD, DEAD}
-        };
-
-        assertThat(game.getNewCells(cells), is(expectedCells));
-
-        //inverse process
-        assertThat(game.getNewCells(expectedCells), is(cells));
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                assertThat(cells[i][j], is(DEAD));
+            }
+        }
     }
 
 }

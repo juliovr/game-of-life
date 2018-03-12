@@ -5,50 +5,45 @@ import java.util.Random;
 public class Game {
 
     private final Random random;
+    private Cell[][] cells;
 
-    public Game(Random random) {
+    public Game(Random random, int width, int height) {
         this.random = random;
+        this.cells = new Cell[width][height];
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                cells[i][j] = getRandomCellState();
+            }
+        }
+    }
+
+    public Game(Cell[][] cells) {
+        this.random = null;
+        this.cells = cells;
+    }
+
+    public Cell[][] getCells() {
+        return this.cells;
     }
 
     public Cell getRandomCellState() {
         return Cell.values()[random.nextInt(Cell.values().length)];
     }
 
-    public int getNumberOfLiveNeighbours(Cell[][] cells, int i, int j) {
-        int minIndexI = Math.max(i - 1, 0);
-        int maxIndexI = Math.min(i + 1, cells.length - 1);
-
-        int minIndexJ = Math.max(j - 1, 0);
-        int maxIndexJ = Math.min(j + 1, cells[0].length - 1);
-
-        int liveNeighbours = 0;
-
-        for (int k = minIndexI; k <= maxIndexI; k++) {
-            for (int l = minIndexJ; l <= maxIndexJ; l++) {
-                if (k == i && l == j)
-                    continue;
-
-                if (cells[k][l] == Cell.ALIVE)
-                    liveNeighbours++;
-            }
-        }
-
-        return liveNeighbours;
-    }
-
-    public Cell[][] getNewCells(Cell[][] cells) {
+    public void updateCells() {
         int n = cells.length;
         int m = cells[0].length;
         Cell[][] newCells = new Cell[n][m];
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                int liveNeighbours = getNumberOfLiveNeighbours(cells, i, j);
+                int liveNeighbours = Rules.getNumberOfLiveNeighbours(cells, i, j);
                 newCells[i][j] = Rules.getNewState(cells[i][j], liveNeighbours);
             }
         }
 
-        return newCells;
+        this.cells = newCells;
     }
 
 }
